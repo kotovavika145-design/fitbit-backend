@@ -31,7 +31,8 @@ CORS(app, resources={
             "http://localhost:5173",   # Vite dev server
             "http://localhost:3000",   # Autre port possible
             "http://localhost",
-            "http://127.0.0.1:5173"
+            "http://127.0.0.1:5173",
+            "https://fitbit-frontend.vercel.app"
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
