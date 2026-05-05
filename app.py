@@ -25,19 +25,15 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 
 # ─── ÉTAPE 4 : Activer CORS ──────────────────────────────────────────────────
 # Autorise les requêtes venant du frontend Vue.js (port 5173 par défaut avec Vite)
-CORS(app, resources={
-    r"/api/*": {
-        "origins": [
-            "http://localhost:5173",   # Vite dev server
-            "http://localhost:3000",   # Autre port possible
-            "http://localhost",
-            "http://127.0.0.1:5173",
-            "https://fitbit-frontend.vercel.app"
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
-    }
-})
+CORS(
+    app,
+    origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://fitbit-frontend.vercel.app"
+    ],
+    supports_credentials=True
+)
 
 # ─── ÉTAPE 4bis : Initialiser SocketIO ───────────────────────────────────────
 # cors_allowed_origins="*" autorise le frontend Vue.js à se connecter en WebSocket
