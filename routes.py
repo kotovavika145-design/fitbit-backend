@@ -397,6 +397,7 @@ def get_active_session():
     session = (
         Session.query
         .filter_by(status='active')
+        .filter(Session.start_time.isnot(None))
         .order_by(Session.start_time.desc())
         .first()
     )
@@ -614,7 +615,7 @@ def add_physiological_sample(session_id):
         nasa_score=None,
         hr=phys_data.get('heart_rate'),
         hrv=phys_data.get('hrv'),
-        hr_rest=phys_data.get('resting_heart_rate')
+        hr_rest=phys_data.get('resting_heart_rate') or 65
     )
 
     return jsonify({
