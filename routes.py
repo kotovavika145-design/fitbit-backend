@@ -1,3 +1,5 @@
+import os
+
 from flask import Blueprint, request, jsonify, redirect
 """blueprint : sert à regrouper les routes
 request : sert à lire les requetes http
@@ -21,6 +23,9 @@ import mental_load_service
 """on crée un groupes de routes nommé api
 toutes les routes seront /api/... """
 api = Blueprint('api', __name__)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+
 
 # routes fitbit 
 @api.route('/fitbit/authorize/<int:user_id>', methods=['GET'])
@@ -51,7 +56,7 @@ def fitbit_callback():
 
     if error:
         # L'utilisateur a refusé l'accès, on le redirige vers le front
-        return redirect(f'http://localhost:5173?fitbit=denied')
+        return redirect(f'{FRONTEND_URL}?fitbit=denied')
         # s'il y a un paramétre manquant, on le signale
     if not code or not user_id:
         return jsonify({'error': 'Paramètres manquants (code ou state)'}), 400
@@ -66,9 +71,9 @@ def fitbit_callback():
 
     if result['success']:
         # Rediriger vers le frontend avec succès
-        return redirect(f'http://localhost:5173?fitbit=connected&user_id={user_id}')
+        return redirect(f'{FRONTEND_URL}?fitbit=connected&user_id={user_id}')
     else:
-        return redirect(f'http://localhost:5173?fitbit=error&msg={result.get("error", "Erreur inconnue")}')
+        return redirect(f'{FRONTEND_URL}?fitbit=error&msg={result.get("error", "Erreur inconnue")}')
 
 
 @api.route('/fitbit/status/<int:user_id>', methods=['GET'])
