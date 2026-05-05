@@ -1,9 +1,9 @@
 import os
 import threading
 from datetime import datetime
+from flask_socketio import SocketIO, emit
 from flask import Flask, request
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
 from dotenv import load_dotenv
 from extensions import db
 from models import User, FitbitToken, Session, PhysiologicalData, SessionParticipant
