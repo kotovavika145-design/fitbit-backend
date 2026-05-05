@@ -170,10 +170,20 @@ def handle_session_lancee(data):
     # ── 1. Mettre à jour le statut en BDD ──────────────────────────────────
     if session_id:
         with app.app_context():
+            # Fermer toutes les anciennes sessions actives
+            Session.query.filter(
+                Session.status == 'active',
+                Session.id != session_id
+            ).update({
+                "status": "finished",
+                "end_time": datetime.utcnow()
+            }, synchronize_session=False)
+
             session = Session.query.get(session_id)
             if session:
                 session.status     = 'active'
                 session.start_time = datetime.utcnow()
+                session.end_time = None
                 db.session.commit()
                 print(f"✅ Session {session_id} passée à 'active' en BDD")
 
