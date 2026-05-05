@@ -239,11 +239,12 @@ if __name__ == '__main__':
     print("🚀 Démarrage du serveur Flask...")
     print(f"   Base de données : {os.getenv('DATABASE_URL', 'non configurée')}")
     print(f"   Fitbit Client ID : {os.getenv('FITBIT_CLIENT_ID', 'non configuré')}")
-    print(f"   Serveur disponible sur : http://localhost:5000")
+    port = int(os.environ.get("PORT", 5000))
+    print(f"   Serveur disponible sur : http://0.0.0.0:{port}")
     # socketio.run remplace app.run pour activer le support WebSocket
     socketio.run(
         app,
         host='0.0.0.0',
-        port=5000,
+        port=port,
         debug=True   # À mettre False en production
     )
