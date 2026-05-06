@@ -362,32 +362,6 @@ def get_session(session_id):
         "participants": [p.to_dict() for p in participants]
     })
 
-@api.route('/sessions/<int:session_id>/nasa/start', methods=['POST'])
-def save_nasa_start(session_id):
-    session = Session.query.get(session_id)
-    if not session:
-        return jsonify({'error': 'Session introuvable'}), 404
-    body = request.get_json() or {}
-    user_id = body.get("user_id")
-    nasa_dims = body.get('nasa_dimensions', {})
-
-    if not user_id:
-        return jsonify({"error": "user_id requis"}), 400
-    nasa_response = NasaTlxResponse(
-        user_id=user_id,
-        session_id=session_id,
-        mental=nasa_dims.get("mental_demand", 0),
-        physical=nasa_dims.get("physical_demand", 0),
-        temporal=nasa_dims.get("temporal_demand", 0),
-        performance=nasa_dims.get("performance", 0),
-        effort=nasa_dims.get("effort", 0),
-        frustration=nasa_dims.get("frustration", 0),
-        response_time="start",
-    )
-
-    db.session.add(nasa_response)
-    db.session.commit()
-    return jsonify({"message": "NASA TLX début enregistré"})
 
 # retourne l'historique des sessions d'un utilisateur
 @api.route('/sessions/created_by/<int:user_id>', methods=['GET'])
