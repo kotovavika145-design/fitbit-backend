@@ -654,7 +654,7 @@ def add_physiological_sample(session_id):
         nasa_score=None,
         hr=phys_data.get('heart_rate'),
         hrv=phys_data.get('hrv'),
-        hr_rest=phys_data.get('resting_heart_rate') or 65
+        hr_rest=phys_data.get('resting_heart_rate') or 55
     )
 
     return jsonify({
