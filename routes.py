@@ -675,7 +675,7 @@ def add_physiological_sample(session_id):
     nasa_score = mental_load_service.calculate_nasa_tlx(nasa_dimensions)
 
     partial_result = mental_load_service.calculate_mental_load_score(
-        nasa_score=None,
+        nasa_score=nasa_score,
         hr=phys_data.get('heart_rate'),
         hrv=phys_data.get('hrv'),
         hr_rest=phys_data.get('resting_heart_rate') or 55
@@ -683,6 +683,7 @@ def add_physiological_sample(session_id):
 
     return jsonify({
         **phys_data,
+        'nasa_score': nasa_score,
         'mental_load_score': partial_result.get('score'),
         'mental_load_level': partial_result.get('level'),
         'data_id': data_row.id
