@@ -696,7 +696,8 @@ def add_physiological_sample(session_id):
         'nasa_score': nasa_score,
         'mental_load_score': partial_result.get('score'),
         'mental_load_level': partial_result.get('level'),
-        'data_id': data_row.id
+        'data_id': data_row.id,
+        'calculation_details': partial_result.get('details', {}),
     })
 
 
