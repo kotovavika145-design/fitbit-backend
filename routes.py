@@ -655,9 +655,9 @@ def add_physiological_sample(session_id):
         NasaTlxResponse.query
         .filter_by(
             session_id=session_id,
-            user_id=user_id,
-            response_time="start"
+            user_id=user_id
         )
+        .order_by(NasaTlxResponse.created_at.desc())
         .first()
     )
 
