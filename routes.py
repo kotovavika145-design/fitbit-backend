@@ -648,6 +648,13 @@ def add_physiological_sample(session_id):
         recorded_at=datetime.utcnow(),
     )
     db.session.add(data_row)
+    participant = SessionParticipant.query.filter_by(
+        session_id=session_id,
+        user_id=user_id
+    ).first()
+
+    if participant:
+        participant.fitbit_connected = True
     db.session.commit()
 
     nasa_start = (
