@@ -511,7 +511,8 @@ def save_nasa_start(session_id):
         temporal=nasa_dims.get("temporal_demand", 0),
         performance=nasa_dims.get("performance", 0),
         effort=nasa_dims.get("effort", 0),
-        frustration=nasa_dims.get("frustration", 0)
+        frustration=nasa_dims.get("frustration", 0),
+        response_time="start"
     )
 
     db.session.add(nasa_response)
@@ -573,7 +574,7 @@ def end_session(session_id):
             performance=nasa_dims.get("performance", 0),
             effort=nasa_dims.get("effort", 0),
             frustration=nasa_dims.get("frustration", 0),
-            response_time="end",
+            response_time="end"
         )
         db.session.add(nasa_response)
         nasa_score = mental_load_service.calculate_nasa_tlx(nasa_dims)
@@ -653,7 +654,8 @@ def add_physiological_sample(session_id):
         NasaTlxResponse.query
         .filter_by(
             session_id=session_id,
-            user_id=user_id
+            user_id=user_id,
+            response_time="start"
         )
         .first()
     )
