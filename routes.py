@@ -773,33 +773,72 @@ def teacher_session_results(session_id):
             .first()
         )
 
-        nasa_end = (
+        samples = (
+            PhysiologicalData.query
+            .filter_by(session_id=session_id, user_id=p.user_id)
+            .order_by(PhysiologicalData.recorded_at.desc())
+            .all()
+        )
+
+        hr_values = [x.heart_rate for x in samples if x.heart_rate is not None]
+        hrv_values_user = [x.hrv for x in samples if x.hrv is not None]
+
+        avg_hr = sum(hr_values) / len(hr_values) if hr_values else None
+        avg_hrv = sum(hrv_values_user) / len(hrv_values_user) if hrv_values_user else None
+
+        nasa_start = (
             NasaTlxResponse.query
-            .filter_by(session_id=session_id, user_id=p.user_id, response_time="end")
+            .filter_by(session_id=session_id, user_id=p.user_id, response_time="start")
             .order_by(NasaTlxResponse.created_at.desc())
             .first()
         )
 
-        if result and result.global_score is not None:
-            scores.append(result.global_score)
+        nasa_score = None
+        if nasa_start:
+            nasa_score = mental_load_service.calculate_nasa_tlx({
+                "mental_demand": nasa_start.mental,
+                "physical_demand": nasa_start.physical,
+                "temporal_demand": nasa_start.temporal,
+                "performance": nasa_start.performance,
+                "effort": nasa_start.effort,
+                "frustration": nasa_start.frustration,
+            })
 
-        if result and result.avg_heart_rate is not None:
-            heart_rates.append(result.avg_heart_rate)
+        if result:
+            score = result.global_score
+            level = result.level
+            if result.nasa_score is not None:
+                nasa_score = result.nasa_score
+            if result.avg_heart_rate is not None:
+                avg_hr = result.avg_heart_rate
+            if result.avg_hrv is not None:
+                avg_hrv = result.avg_hrv
+        else:
+            partial = mental_load_service.calculate_mental_load_score(
+                nasa_score=nasa_score,
+                hr=avg_hr,
+                hrv=avg_hrv,
+                hr_rest=65
+            )
+            score = partial.get("score")
+            level = partial.get("level")
 
-        if result and result.avg_hrv is not None:
-            hrv_values.append(result.avg_hrv)
-
-        nasa_score = result.nasa_score if result else None
+        if score is not None:
+            scores.append(score)
+        if avg_hr is not None:
+            heart_rates.append(avg_hr)
+        if avg_hrv is not None:
+            hrv_values.append(avg_hrv)
 
         students.append({
             "user_id": p.user_id,
             "email": user.email if user else f"Utilisateur {p.user_id}",
             "fitbit_connected": p.fitbit_connected,
             "nasa_score": nasa_score,
-            "avg_heart_rate": result.avg_heart_rate if result else None,
-            "avg_hrv": result.avg_hrv if result else None,
-            "mental_load_score": result.global_score if result else None,
-            "mental_load_level": result.level if result else None,
+            "avg_heart_rate": avg_hr,
+            "avg_hrv": avg_hrv,
+            "mental_load_score": score,
+            "mental_load_level": level,
         })
 
     cm_groupe = round(sum(scores) / len(scores), 1) if scores else 0
