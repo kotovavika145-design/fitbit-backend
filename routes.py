@@ -377,6 +377,44 @@ def get_sessions_created_by(user_id):
         .order_by(Session.start_time.desc())
         .all()
     )
+
+    results = []
+
+    for s in sessions:
+
+        participants = SessionParticipant.query.filter_by(
+            session_id=s.id
+        ).all()
+
+        mental_results = MentalLoadResult.query.filter_by(
+            session_id=s.id
+        ).all()
+
+        scores = [
+            r.global_score
+            for r in mental_results
+            if r.global_score is not None
+        ]
+
+        avg_score = round(sum(scores) / len(scores), 1) if scores else None
+
+        level = None
+
+        if avg_score is not None:
+            if avg_score < 40:
+                level = "low"
+            elif avg_score > 70:
+                level = "high"
+            else:
+                level = "moderate"
+
+        results.append({
+            **s.to_dict(),
+            "participants_count": len(participants),
+            "mental_load_score": avg_score,
+            "mental_load_level": level,
+        })
+
     return jsonify([s.to_dict() for s in sessions])
 
 @api.route("/sessions/participant/<int:user_id>", methods=["GET"])
