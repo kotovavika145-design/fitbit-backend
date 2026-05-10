@@ -12,7 +12,7 @@
 
 # ─── Constantes de normalisation ────────────────────────────────────────────
 # Valeurs de référence physiologiques (adulte sain au repos, activité légère)
-HR_REST_DEFAULT = 55     # FC repos par défaut (bpm)
+HR_REST_DEFAULT = 65     # FC repos par défaut (bpm)
 HR_MAX_DEFAULT = 185     # FC max estimée (bpm)
 HRV_MIN_DEFAULT = 20     # HRV minimale (ms) → stress maximal
 HRV_MAX_DEFAULT = 80     # HRV maximale (ms) → très relaxé
@@ -97,10 +97,8 @@ def calculate_nasa_tlx(dimensions):
     values = []
     for key in required:
         val = dimensions.get(key)
-        if key == "performance":
-            val = 100 - float(val)
-        else:
-            val = float(val)
+        if val is not None:
+            values.append(float(val))
 
     if not values:
         return None
