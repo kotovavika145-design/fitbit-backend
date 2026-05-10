@@ -629,6 +629,7 @@ def add_physiological_sample(session_id):
 
     body = request.get_json() or {}
     user_id = body.get("user_id")
+    nasa_dims_from_front = body.get("nasa_dimensions")
 
     if not user_id:
         return jsonify({"error": "user_id requis"}), 400
@@ -662,7 +663,14 @@ def add_physiological_sample(session_id):
 
     nasa_score = None
 
-    if nasa_start:
+    # priorité : NASA envoyé par le frontend
+    if nasa_dims_from_front:
+        nasa_score = mental_load_service.calculate_nasa_tlx(
+            nasa_dims_from_front
+        )
+
+    # sinon fallback BDD
+    elif nasa_start:
         nasa_dimensions = {
             "mental_demand": nasa_start.mental,
             "physical_demand": nasa_start.physical,
@@ -672,7 +680,9 @@ def add_physiological_sample(session_id):
             "frustration": nasa_start.frustration,
         }
 
-        nasa_score = mental_load_service.calculate_nasa_tlx(nasa_dimensions)
+        nasa_score = mental_load_service.calculate_nasa_tlx(
+            nasa_dimensions
+        )
 
     partial_result = mental_load_service.calculate_mental_load_score(
         nasa_score=nasa_score,
