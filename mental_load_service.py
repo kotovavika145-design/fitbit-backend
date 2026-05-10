@@ -97,8 +97,10 @@ def calculate_nasa_tlx(dimensions):
     values = []
     for key in required:
         val = dimensions.get(key)
-        if val is not None:
-            values.append(float(val))
+        if key == "performance":
+            val = 100 - float(val)
+        else:
+            val = float(val)
 
     if not values:
         return None

@@ -196,6 +196,23 @@ def handle_session_lancee(data):
         'nom':           nom_session
     }, broadcast=True)
 
+@socketio.on('sample_recu')
+def handle_sample_recu(data):
+    """
+    Un étudiant a récupéré une nouvelle mesure Fitbit.
+    On prévient l'interface enseignant pour qu'elle recharge les données.
+    """
+    emit('nouveau_sample', data, broadcast=True)
+
+
+@socketio.on('score_soumis')
+def handle_score_soumis(data):
+    """
+    Un étudiant a soumis son score final.
+    On prévient l'interface enseignant pour qu'elle recharge les résultats.
+    """
+    emit('nouveau_score', data, broadcast=True)
+
 
 @socketio.on('session_terminee')
 def handle_session_terminee(data):
