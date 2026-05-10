@@ -670,7 +670,7 @@ def add_physiological_sample(session_id):
             "frustration": nasa_start.frustration,
         }
 
-    nasa_score = mental_load_service.calculate_nasa_tlx(nasa_dimensions)
+        nasa_score = mental_load_service.calculate_nasa_tlx(nasa_dimensions)
 
     partial_result = mental_load_service.calculate_mental_load_score(
         nasa_score=nasa_score,
