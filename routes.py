@@ -511,8 +511,7 @@ def save_nasa_start(session_id):
         temporal=nasa_dims.get("temporal_demand", 0),
         performance=nasa_dims.get("performance", 0),
         effort=nasa_dims.get("effort", 0),
-        frustration=nasa_dims.get("frustration", 0),
-        response_time="start",
+        frustration=nasa_dims.get("frustration", 0)
     )
 
     db.session.add(nasa_response)
@@ -654,8 +653,7 @@ def add_physiological_sample(session_id):
         NasaTlxResponse.query
         .filter_by(
             session_id=session_id,
-            user_id=user_id,
-            response_time="start"
+            user_id=user_id
         )
         .first()
     )
