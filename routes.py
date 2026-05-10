@@ -467,7 +467,6 @@ def get_user_sessions_compat(user_id):
         nasa = (
             NasaTlxResponse.query
             .filter_by(session_id=s.id, user_id=user_id)
-            .order_by(NasaTlxResponse.created_at.desc())
             .first()
         )
 
@@ -658,7 +657,6 @@ def add_physiological_sample(session_id):
             user_id=user_id,
             response_time="start"
         )
-        .order_by(NasaTlxResponse.created_at.desc())
         .first()
     )
 
@@ -787,7 +785,6 @@ def teacher_session_results(session_id):
         nasa_start = (
             NasaTlxResponse.query
             .filter_by(session_id=session_id, user_id=p.user_id, response_time="start")
-            .order_by(NasaTlxResponse.created_at.desc())
             .first()
         )
 
