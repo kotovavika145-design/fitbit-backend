@@ -750,6 +750,72 @@ def compute_mental_load():
 # ═══════════════════════════════════════════════════════════════════
 # ROUTE DE SANTÉ (Health Check)
 # ═══════════════════════════════════════════════════════════════════
+@api.route('/teacher/sessions/<int:session_id>/results', methods=['GET'])
+def teacher_session_results(session_id):
+    session = Session.query.get(session_id)
+    if not session:
+        return jsonify({'error': 'Session introuvable'}), 404
+
+    participants = SessionParticipant.query.filter_by(session_id=session_id).all()
+
+    students = []
+    scores = []
+    heart_rates = []
+    hrv_values = []
+
+    for p in participants:
+        user = User.query.get(p.user_id)
+
+        result = (
+            MentalLoadResult.query
+            .filter_by(session_id=session_id, user_id=p.user_id)
+            .order_by(MentalLoadResult.created_at.desc())
+            .first()
+        )
+
+        nasa_end = (
+            NasaTlxResponse.query
+            .filter_by(session_id=session_id, user_id=p.user_id, response_time="end")
+            .order_by(NasaTlxResponse.created_at.desc())
+            .first()
+        )
+
+        if result and result.global_score is not None:
+            scores.append(result.global_score)
+
+        if result and result.avg_heart_rate is not None:
+            heart_rates.append(result.avg_heart_rate)
+
+        if result and result.avg_hrv is not None:
+            hrv_values.append(result.avg_hrv)
+
+        nasa_score = result.nasa_score if result else None
+
+        students.append({
+            "user_id": p.user_id,
+            "email": user.email if user else f"Utilisateur {p.user_id}",
+            "fitbit_connected": p.fitbit_connected,
+            "nasa_score": nasa_score,
+            "avg_heart_rate": result.avg_heart_rate if result else None,
+            "avg_hrv": result.avg_hrv if result else None,
+            "mental_load_score": result.global_score if result else None,
+            "mental_load_level": result.level if result else None,
+        })
+
+    cm_groupe = round(sum(scores) / len(scores), 1) if scores else 0
+    fc_moyenne = round(sum(heart_rates) / len(heart_rates), 1) if heart_rates else 0
+
+    return jsonify({
+        "session": session.to_dict(),
+        "stats": {
+            "cmGroupe": cm_groupe,
+            "enSurcharge": len([s for s in scores if s > 80]),
+            "fcMoyenne": fc_moyenne,
+            "connectes": len([p for p in participants if p.fitbit_connected]),
+            "total": len(participants),
+        },
+        "students": students
+    })
 
 @api.route('/health', methods=['GET'])
 def health_check():

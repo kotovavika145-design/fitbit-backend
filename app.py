@@ -247,14 +247,6 @@ def handle_session_terminee(data):
     emit('aller_questionnaire', {}, broadcast=True)
 
 
-@socketio.on('score_soumis')
-def handle_score_soumis(data):
-    """
-    Un étudiant soumet son score NASA-TLX.
-    data = { 'username': '...', 'score': '...', 'niveau': '...' }
-    → on notifie l'enseignant pour rafraîchir la vue groupe
-    """
-    emit('nouveau_score', data, broadcast=True)
 
 
 # ─── ÉTAPE 8 : Lancer le serveur ────────────────────────────────────────────
