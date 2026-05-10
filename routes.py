@@ -650,6 +650,32 @@ def add_physiological_sample(session_id):
     db.session.add(data_row)
     db.session.commit()
 
+    # Récupérer le questionnaire NASA-TLX du début de session
+    nasa_start = (
+        NasaTlxResponse.query
+        .filter_by(
+            session_id=session_id,
+            user_id=user_id,
+            response_time="start"
+        )
+        .order_by(NasaTlxResponse.created_at.desc())
+        .first()
+    )
+
+    nasa_score = None
+
+    if nasa_start:
+        nasa_dimensions = {
+            "mental_demand": nasa_start.mental,
+            "physical_demand": nasa_start.physical,
+            "temporal_demand": nasa_start.temporal,
+            "performance": nasa_start.performance,
+            "effort": nasa_start.effort,
+            "frustration": nasa_start.frustration,
+        }
+
+    nasa_score = mental_load_service.calculate_nasa_tlx(nasa_dimensions)
+
     partial_result = mental_load_service.calculate_mental_load_score(
         nasa_score=None,
         hr=phys_data.get('heart_rate'),
@@ -733,6 +759,103 @@ def compute_mental_load():
 # ═══════════════════════════════════════════════════════════════════
 # ROUTE DE SANTÉ (Health Check)
 # ═══════════════════════════════════════════════════════════════════
+
+@api.route('/teacher/sessions/<int:session_id>/results', methods=['GET'])
+def teacher_session_results(session_id):
+    participants = SessionParticipant.query.filter_by(session_id=session_id).all()
+
+    students = []
+    scores = []
+    heart_rates = []
+    connected = 0
+    surcharge = 0
+
+    for p in participants:
+        user = User.query.get(p.user_id)
+        last_data = (
+            PhysiologicalData.query
+            .filter_by(session_id=session_id, user_id=p.user_id)
+            .order_by(PhysiologicalData.recorded_at.desc())
+            .first()
+        )
+        result = (
+            MentalLoadResult.query
+            .filter_by(session_id=session_id, user_id=p.user_id)
+            .order_by(MentalLoadResult.created_at.desc())
+            .first()
+        )
+        nasa_start = (
+            NasaTlxResponse.query
+            .filter_by(session_id=session_id, user_id=p.user_id, response_time="start")
+            .order_by(NasaTlxResponse.created_at.desc())
+            .first()
+        )
+
+        score = result.global_score if result else None
+        level = result.level if result else None
+        hr = last_data.heart_rate if last_data else None
+        hrv = last_data.hrv if last_data else None
+
+        nasa_score = None
+        if nasa_start:
+            nasa_dimensions = {
+                "mental_demand": nasa_start.mental,
+                "physical_demand": nasa_start.physical,
+                "temporal_demand": nasa_start.temporal,
+                "performance": nasa_start.performance,
+                "effort": nasa_start.effort,
+                "frustration": nasa_start.frustration,
+            }
+            nasa_score = mental_load_service.calculate_nasa_tlx(nasa_dimensions)
+        live_score = None
+        live_level = None
+        if nasa_score is not None or hr is not None or hrv is not None:
+            live_result = mental_load_service.calculate_mental_load_score(
+                nasa_score=nasa_score,
+                hr=hr,
+                hrv=hrv,
+                hr_rest=65
+            )
+            live_score = live_result.get("score")
+            live_level = live_result.get("level")
+        final_score = score if score is not None else live_score
+        final_level = level if level is not None else live_level
+
+        if final_score is not None:
+            scores.append(final_score)
+            if final_score > 80:
+                surcharge += 1
+
+        if hr is not None:
+            heart_rates.append(hr)
+
+        if p.fitbit_connected:
+            connected += 1
+
+        students.append({
+            "user_id": p.user_id,
+            "email": user.email if user else f"Étudiant {p.user_id}",
+            "avg_heart_rate": hr,
+            "avg_hrv": hrv,
+            "nasa_score": nasa_score,
+            "mental_load_score": final_score,
+            "mental_load_level": final_level,
+            "fitbit_connected": p.fitbit_connected
+        })
+
+    cm_groupe = round(sum(scores) / len(scores), 2) if scores else 0
+    fc_moyenne = round(sum(heart_rates) / len(heart_rates), 2) if heart_rates else 0
+
+    return jsonify({
+        "stats": {
+            "cmGroupe": cm_groupe,
+            "enSurcharge": surcharge,
+            "fcMoyenne": fc_moyenne,
+            "connectes": connected,
+            "total": len(participants)
+        },
+        "students": students
+    })
 
 @api.route('/health', methods=['GET'])
 def health_check():
