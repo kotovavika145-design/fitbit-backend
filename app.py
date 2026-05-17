@@ -57,6 +57,10 @@ with app.app_context():
     # Enregistrer le Blueprint des routes avec le préfixe /api
     from routes import api
     app.register_blueprint(api, url_prefix='/api')
+    
+    @app.route('/debug-routes')
+    def debug_routes():
+        return str(app.url_map)
     print("✅ Routes enregistrées sous /api")
 
 
