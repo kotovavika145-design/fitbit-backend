@@ -261,5 +261,6 @@ if __name__ == '__main__':
         app,
         host='0.0.0.0',
         port=port,
-        debug=False  # À mettre False en production
+        debug=False,
+        allow_unsafe_werkzeug=True  # À mettre False en production
     )
