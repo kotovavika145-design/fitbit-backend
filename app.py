@@ -51,6 +51,9 @@ with app.app_context():
     db.create_all()
     print("Tables créées (ou déjà existantes)")
 
+    import routes
+    print("ROUTES FILE =", routes.__file__)
+
     # Enregistrer le Blueprint des routes avec le préfixe /api
     from routes import api
     app.register_blueprint(api, url_prefix='/api')
