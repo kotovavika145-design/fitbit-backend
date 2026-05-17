@@ -25,7 +25,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 
 # ─── ÉTAPE 4 : Activer CORS ──────────────────────────────────────────────────
 # Autorise les requêtes venant du frontend Vue.js (port 5173 par défaut avec Vite)
-"""CORS(
+CORS(
     app,
     origins=[
         "http://localhost:5173",
@@ -33,9 +33,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
         "https://fitbit-frontend.vercel.app"
     ],
     supports_credentials=True
-)"""
-
-CORS(app, resources={r"/api/*": {"origins": ["https://fitbit-frontend.vercel.app"]}})
+)
 
 # ─── ÉTAPE 4bis : Initialiser SocketIO ───────────────────────────────────────
 # cors_allowed_origins="*" autorise le frontend Vue.js à se connecter en WebSocket
@@ -53,16 +51,9 @@ with app.app_context():
     db.create_all()
     print("Tables créées (ou déjà existantes)")
 
-    import routes
-    print("ROUTES FILE =", routes.__file__)
-
     # Enregistrer le Blueprint des routes avec le préfixe /api
     from routes import api
     app.register_blueprint(api, url_prefix='/api')
-
-    @app.route('/debug-routes')
-    def debug_routes():
-        return str(app.url_map)
     print("✅ Routes enregistrées sous /api")
 
 
@@ -270,5 +261,5 @@ if __name__ == '__main__':
         app,
         host='0.0.0.0',
         port=port,
-        debug=False   # À mettre False en production
+        debug=False  # À mettre False en production
     )
