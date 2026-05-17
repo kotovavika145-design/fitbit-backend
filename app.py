@@ -35,11 +35,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
     supports_credentials=True
 )"""
 
-CORS(
-    app,
-    resources={r"/*": {"origins": "*"}},
-    supports_credentials=False
-)
+CORS(app, resources={r"/api/*": {"origins": ["https://fitbit-frontend.vercel.app"]}})
 
 # ─── ÉTAPE 4bis : Initialiser SocketIO ───────────────────────────────────────
 # cors_allowed_origins="*" autorise le frontend Vue.js à se connecter en WebSocket
