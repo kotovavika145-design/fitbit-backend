@@ -37,7 +37,7 @@ CORS(
 
 # ─── ÉTAPE 4bis : Initialiser SocketIO ───────────────────────────────────────
 # cors_allowed_origins="*" autorise le frontend Vue.js à se connecter en WebSocket
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # ─── ÉTAPE 5 : Initialiser SQLAlchemy ───────────────────────────────────────
 db.init_app(app)
